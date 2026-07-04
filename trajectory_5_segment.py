@@ -59,51 +59,69 @@ class Trajectory:
                 - 1/2 * self.t2 * self.t3**2)
         return 0
     
+    def __x1(self, t: float):
+        '''
+        Finds x1(t), the position in the first segment.
+        '''
+        return self.start_pos - self.acc_coeff / 12 * (
+            t**4
+            - 2 * (self.t0 + self.t1) * t**3
+            + 6 * self.t0 * self.t1 * t**2
+            - 2 * self.t0**2 * (3 * self.t1 - self.t0) * t
+            - self.t0**3 * (self.t0 - 2 * self.t1)
+        )
+    
+    def __x2(self, t: float):
+        '''
+        Finds x2(t), the position in the second segment.
+        '''
+        return self.start_pos - self.acc_coeff / 12 * (
+            (
+                2 * self.t0**3 - 2 * self.t1**3
+                + 6 * self.t0 * self.t1 * (self.t1 - self.t0)
+            ) * t
+            + self.t1**4
+            - 2 * self.t0 * self.t1**3
+            + 2 * self.t0**3 * self.t1
+            - self.t0**4
+        )
+    
+    def __x3(self, t: float):
+        '''
+        Finds x3(t), the position in the third segment.
+        '''
+        c = self.acc_coeff / 12 * (
+            self.t2**4
+            - 4 * self.t2**3 * self.t3
+            + 6 * self.t2**2 * self.t3**2
+            - 2 * self.t2 * self.t3**3
+            - 2 * self.t0**3 * self.t2
+            + 2 * self.t1**3 * self.t2
+            + 6 * self.t0**2 * self.t1 * self.t2
+            - 6 * self.t0 * self.t1**2 * self.t2
+            - self.t1**4
+            + 2 * self.t0 * self.t1**3
+            - 2 * self.t0**3 * self.t1
+            + self.t0**4
+        )
+        return c + self.start_pos + self.acc_coeff / 12 * (
+            t**4
+            - 2 * (self.t2 + self.t3) * t**3
+            + 6 * self.t2 * self.t3 * t**2
+            + 2 * self.t3**3 * t
+            - 6 * self.t2 * self.t3**2 * t
+        )
+    
     def get_position(self, t: float):
         if t < self.t0:
             return self.start_pos
         if self.t0 <= t and t < self.t1:
-            return self.start_pos - self.acc_coeff / 12 * (
-                t**4
-                - 2 * (self.t0 + self.t1) * t**3
-                + 6 * self.t0 * self.t1 * t**2
-                - 2 * self.t0**2 * (3 * self.t1 - self.t0) * t
-                - self.t0**3 * (self.t0 - 2 * self.t1)
-            )
+            return self.__x1(t)
         if self.t1 <= t and t < self.t2:
-            return self.start_pos - self.acc_coeff / 12 * (
-                (
-                    2 * self.t0**3 - 2 * self.t1**3
-                    + 6 * self.t0 * self.t1 * (self.t1 - self.t0)
-                ) * t
-                + self.t1**4
-                - 2 * self.t0 * self.t1**3
-                + 2 * self.t0**3 * self.t1
-                - self.t0**4
-            )
+            return self.__x2(t)
         if self.t2 <= t and t < self.t3:
-            c = self.acc_coeff / 12 * (
-                self.t2**4
-                - 4 * self.t2**3 * self.t3
-                + 6 * self.t2**2 * self.t3**2
-                - 2 * self.t2 * self.t3**3
-                - 2 * self.t0**3 * self.t2
-                + 2 * self.t1**3 * self.t2
-                + 6 * self.t0**2 * self.t1 * self.t2
-                - 6 * self.t0 * self.t1**2 * self.t2
-                - self.t1**4
-                + 2 * self.t0 * self.t1**3
-                - 2 * self.t0**3 * self.t1
-                + self.t0**4
-            )
-            return c + self.start_pos + self.acc_coeff / 12 * (
-                t**4
-                - 2 * (self.t2 + self.t3) * t**3
-                + 6 * self.t2 * self.t3 * t**2
-                + 2 * self.t3**3 * t
-                - 6 * self.t2 * self.t3**2 * t
-            )
-        return self.final_pos
+            return self.__x3(t)
+        return self.__x3(self.t3)
 
 TOTAL_TIME = 10
 DATA_POINT_COUNT = TOTAL_TIME * 10
