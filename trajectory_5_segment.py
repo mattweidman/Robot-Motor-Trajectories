@@ -23,13 +23,34 @@ class Trajectory:
         self.t2 = self.t1 + vel_duration # t2 = time second acceleration interval begins
         self.t3 = self.t2 + acc_duration # t3 = time entire trajectory ends
 
-        self.acc_coefficient = 4 * max_acc / acc_duration**2
+        # Coefficient used in acceleration calculations
+        self.acc_coeff = 4 * max_acc / acc_duration**2
 
     def get_acceleration(self, t: float):
-        if self.t0 < t and t < self.t1:
-            return - self.acc_coefficient * (t**2 - (self.t0 + self.t1) * t + self.t0 * self.t1)
-        if self.t2 < t and t < self.t3:
-            return self.acc_coefficient * (t**2 - (self.t2 + self.t3) * t + self.t2 * self.t3)
+        if self.t0 <= t and t < self.t1:
+            return -self.acc_coeff * (t**2 - (self.t0 + self.t1) * t + self.t0 * self.t1)
+        if self.t2 <= t and t < self.t3:
+            return self.acc_coeff * (t**2 - (self.t2 + self.t3) * t + self.t2 * self.t3)
+        return 0
+    
+    def get_velocity(self, t: float):
+        if self.t0 <= t and t < self.t1:
+            return -self.acc_coeff * (
+                1/3 * t**3
+                - 1/2 * (self.t0 + self.t1) * t**2
+                + self.t0 * self.t1 * t
+                + self.t0**2 * (1/6 * self.t0 - 1/2 * self.t1))
+        if self.t1 <= t and t < self.t2:
+            return -self.acc_coeff / 6 * (
+                self.t0**3 - self.t1**3
+                + 3 * self.t0 * self.t1 * (self.t1 - self.t0))
+        if self.t2 <= t and t < self.t3:
+            return self.acc_coeff * (
+                1/3 * t**3
+                - 1/2 * (self.t2 + self.t3) * t**2
+                + self.t2 * self.t3 * t
+                + 1/6 * self.t3**3
+                - 1/2 * self.t2 * self.t3**2)
         return 0
 
 TOTAL_TIME = 10
@@ -45,8 +66,8 @@ trajectory = Trajectory(
     max_acc=10
 )
 
-# Acceleration
 accelerations = [trajectory.get_acceleration(t) for t in times]
+velocities = [trajectory.get_velocity(t) for t in times]
 
-plt.plot(times, accelerations)
+plt.plot(times, velocities)
 plt.show()
