@@ -81,6 +81,28 @@ class Trajectory:
                 + 2 * self.t0**3 * self.t1
                 - self.t0**4
             )
+        if self.t2 <= t and t < self.t3:
+            c = self.acc_coeff / 12 * (
+                self.t2**4
+                - 4 * self.t2**3 * self.t3
+                + 6 * self.t2**2 * self.t3**2
+                - 2 * self.t2 * self.t3**3
+                - 2 * self.t0**3 * self.t2
+                + 2 * self.t1**3 * self.t2
+                + 6 * self.t0**2 * self.t1 * self.t2
+                - 6 * self.t0 * self.t1**2 * self.t2
+                - self.t1**4
+                + 2 * self.t0 * self.t1**3
+                - 2 * self.t0**3 * self.t1
+                + self.t0**4
+            )
+            return c + self.start_pos + self.acc_coeff / 12 * (
+                t**4
+                - 2 * (self.t2 + self.t3) * t**3
+                + 6 * self.t2 * self.t3 * t**2
+                + 2 * self.t3**3 * t
+                - 6 * self.t2 * self.t3**2 * t
+            )
         return self.final_pos
 
 TOTAL_TIME = 10
