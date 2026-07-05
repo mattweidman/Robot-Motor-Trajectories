@@ -40,17 +40,19 @@ class Trajectory:
         return 0
     
     def get_velocity(self, t: float):
-        if self.t0 <= t and t < self.t1:
+        if t < self.t0:
+            return 0
+        if t < self.t1:
             return -self.acc_coeff * (
                 1/3 * t**3
                 - 1/2 * (self.t0 + self.t1) * t**2
                 + self.t0 * self.t1 * t
                 - 1/6 * self.t0**2 * (3 * self.t1 - self.t0))
-        if self.t1 <= t and t < self.t2:
+        elif t < self.t2:
             return -self.acc_coeff / 6 * (
                 self.t0**3 - self.t1**3
                 + 3 * self.t0 * self.t1 * (self.t1 - self.t0))
-        if self.t2 <= t and t < self.t3:
+        elif t < self.t3:
             return self.acc_coeff * (
                 1/3 * t**3
                 - 1/2 * (self.t2 + self.t3) * t**2
@@ -135,11 +137,11 @@ class Trajectory:
     def get_position(self, t: float):
         if t < self.t0:
             return self.start_pos
-        if self.t0 <= t and t < self.t1:
+        elif t < self.t1:
             return self.__x1(t)
-        if self.t1 <= t and t < self.t2:
+        elif t < self.t2:
             return self.__x2(t)
-        if self.t2 <= t and t < self.t3:
+        elif t < self.t3:
             return self.__x3(t)
         return self.__final_pos()
 
@@ -162,5 +164,7 @@ accelerations = [trajectory.get_acceleration(t) for t in times]
 velocities = [trajectory.get_velocity(t) for t in times]
 positions = [trajectory.get_position(t) for t in times]
 
+plt.plot(times, accelerations)
+plt.plot(times, velocities)
 plt.plot(times, positions)
 plt.show()
