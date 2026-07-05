@@ -111,6 +111,26 @@ class Trajectory:
             + 2 * self.t3**3 * t
             - 6 * self.t2 * self.t3**2 * t
         )
+
+    def __final_pos(self):
+        '''
+        Final position of motor.
+        '''
+        return self.start_pos + 1/12 * self.acc_coeff * (
+            self.t3**4
+            + self.t2**4
+            - self.t1**4
+            + self.t0**4
+            - 4 * self.t3**3 * self.t2
+            - 4 * self.t3 * self.t2**3
+            + 6 * self.t2 **2 * self.t3**2
+            + 2 * self.t2 * self.t1**3
+            + 6 * self.t0**2 * self.t1 * self.t2
+            - 6 * self.t0 * self.t1**2 * self.t2
+            - 2 * self.t0**3 * self.t2
+            + 2 * self.t0 * self.t1**3
+            - 2 * self.t0**3 * self.t1
+        )
     
     def get_position(self, t: float):
         if t < self.t0:
@@ -121,7 +141,7 @@ class Trajectory:
             return self.__x2(t)
         if self.t2 <= t and t < self.t3:
             return self.__x3(t)
-        return self.__x3(self.t3)
+        return self.__final_pos()
 
 TOTAL_TIME = 10
 DATA_POINT_COUNT = TOTAL_TIME * 10
