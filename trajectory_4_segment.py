@@ -89,7 +89,7 @@ class Trajectory:
                 + 1/4 * self.t0**3 * self.tt
                 + 1/12 * self.t0**4
             )
-        return self.final_pos
+        return self.start_pos + 1/96 * self.acc_coeff * self.tt**4
 
 TOTAL_TIME = 10
 DATA_POINT_COUNT = TOTAL_TIME * 10
