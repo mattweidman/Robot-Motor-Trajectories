@@ -52,9 +52,44 @@ class Trajectory:
                 1/3 * t**3
                 - (self.t0 + 3/4 * self.tt) * t**2
                 + (self.t0**2 + 3/2 * self.t0 * self.tt + 1/2 * self.tt**2) * t
-                - (1/3 * self.t0**3 + 3/4 * self.t0**2 * self.tt + 1/2 * self.t0 * self.tt**2 + 1/12 * self.tt**3)
+                - (
+                    1/3 * self.t0**3
+                    + 3/4 * self.t0**2 * self.tt
+                    + 1/2 * self.t0 * self.tt**2
+                    + 1/12 * self.tt**3
+                )
             )
         return 0
+    
+    def get_position(self, t: float):
+        if t < self.t0:
+            return self.start_pos
+        if t < self.t1:
+            return self.start_pos - self.acc_coeff * (
+                1/12 * t**4
+                - (1/3 * self.t0 + 1/12 * self.tt) * t**3
+                + (1/2 * self.t0**2 + 1/4 * self.t0 * self.tt) * t**2
+                - (1/3 * self.t0**3 + 1/4 * self.t0**2 * self.tt) * t
+                + 1/12 * self.t0**3 * (self.t0 + self.tt)
+            )
+        if t < self.t2:
+            return self.start_pos + self.acc_coeff * (
+                1/12 * t**4
+                - (1/3 * self.t0 + 1/4 * self.tt) * t**3
+                + (1/2 * self.t0**2 + 3/4 * self.t0 * self.tt + 1/4 * self.tt**2) * t**2
+                - (
+                    1/3 * self.t0**3
+                    + 3/4 * self.t0**2 * self.tt
+                    + 1/2 * self.t0 * self.tt**2
+                    + 1/12 * self.tt**3
+                ) * t
+                + 1/96 * self.tt**4
+                + 1/12 * self.t0 * self.tt**3
+                + 1/4 * self.t0**2 * self.tt**2
+                + 1/4 * self.t0**3 * self.tt
+                + 1/12 * self.t0**4
+            )
+        return self.final_pos
 
 TOTAL_TIME = 10
 DATA_POINT_COUNT = TOTAL_TIME * 10
@@ -72,7 +107,9 @@ trajectory = Trajectory(
 
 accelerations = [trajectory.get_acceleration(t) for t in times]
 velocities = [trajectory.get_velocity(t) for t in times]
+positions = [trajectory.get_position(t) for t in times]
 
 plt.plot(times, accelerations)
 plt.plot(times, velocities)
+plt.plot(times, positions)
 plt.show()
