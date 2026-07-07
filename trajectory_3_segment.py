@@ -66,7 +66,7 @@ def create_trajectory_from_max_acceleration(
         start_pos: float,
         final_pos: float,
         max_acc: float):
-    total_duration = (10/3 * 3**(1/2) * (final_pos - start_pos) / max_acc)**(1/2)
+    total_duration = (10/3 * 3**(1/2) * abs(final_pos - start_pos) / max_acc)**(1/2)
     return Trajectory(start_time, start_pos, final_pos, total_duration)
 
 def create_trajectory_from_max_velocity(
@@ -74,7 +74,7 @@ def create_trajectory_from_max_velocity(
         start_pos: float,
         final_pos: float,
         max_vel: float):
-    total_duration = 15/8 * (final_pos - start_pos) / max_vel
+    total_duration = 15/8 * abs(final_pos - start_pos) / max_vel
     return Trajectory(start_time, start_pos, final_pos, total_duration)
 
 TOTAL_TIME = 10
@@ -83,11 +83,11 @@ DATA_POINT_COUNT = TOTAL_TIME * 10
 # Horizontal axis
 times = [t/TOTAL_TIME for t in range(0, DATA_POINT_COUNT)]
 
-trajectory = create_trajectory_from_max_velocity(
+trajectory = Trajectory(
     start_time=1,
     start_pos=0.5,
-    final_pos=2.5,
-    max_vel=1,
+    final_pos=-2.5,
+    total_duration=5,
 )
 
 accelerations = [trajectory.get_acceleration(t) for t in times]
