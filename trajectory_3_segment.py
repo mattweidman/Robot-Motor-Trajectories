@@ -7,35 +7,35 @@ class Trajectory:
                  start_time: float,
                  start_pos: float,
                  final_pos: float,
-                 total_duration: float):
+                 duration: float):
         self.start_time = start_time
         self.start_pos = start_pos
         self.final_pos = final_pos
-        self.total_duration = total_duration
+        self.duration = duration
 
         # Coefficient used in most acceleration, velocity, and position calculations
-        self.coeff = 120 * (final_pos - start_pos) / self.total_duration**5
+        self.coeff = 120 * (final_pos - start_pos) / self.duration**5
 
     def get_acceleration(self, input_time: float):
         t = input_time - self.start_time
-        d = self.total_duration
-        if 0 <= t and t < self.total_duration:
+        d = self.duration
+        if 0 <= t and t < self.duration:
             return self.coeff * (t**3 - 3/2 * d * t**2 + 1/2 * d**2 * t)
         return 0
     
     def get_velocity(self, input_time: float):
         t = input_time - self.start_time
-        d = self.total_duration
-        if 0 <= t and t < self.total_duration:
+        d = self.duration
+        if 0 <= t and t < self.duration:
             return self.coeff * (1/4 * t**4 - 1/2 * d * t**3 + 1/4 * d**2 * t**2)
         return 0
     
     def get_position(self, input_time: float):
         t = input_time - self.start_time
-        d = self.total_duration
+        d = self.duration
         if t < 0:
             return self.start_pos
-        if t < self.total_duration:
+        if t < self.duration:
             return (
                 self.coeff * (1/20 * t**5 - 1/8 * d * t**4 + 1/12 * d**2 * t**3)
                 + self.start_pos
@@ -43,22 +43,22 @@ class Trajectory:
         return self.coeff * 1/120 * d**5 + self.start_pos
     
     def get_max_velocity(self):
-        return 15/8 * (self.final_pos - self.start_pos) / self.total_duration
+        return 15/8 * (self.final_pos - self.start_pos) / self.duration
     
     def get_max_acceleration(self):
-        return 10/3 * 3**(1/2) * (self.final_pos - self.start_pos) / self.total_duration**2
+        return 10/3 * 3**(1/2) * (self.final_pos - self.start_pos) / self.duration**2
     
     def get_midpoint_time(self):
-        return self.start_time + self.total_duration / 2
+        return self.start_time + self.duration / 2
     
     def get_acceleration_extrema_times(self):
         '''
-        Returns the times acceleration peaks at the beginning and hits a
-        minimum near the end.
+        Returns the times acceleration peaks in the first half and hits a
+        minimum in the second half.
         '''
         return (
-            self.total_duration * (1/2 - 3**(1/2)/6) + self.start_time,
-            self.total_duration * (1/2 + 3**(1/2)/6) + self.start_time
+            self.duration * (1/2 - 3**(1/2)/6) + self.start_time,
+            self.duration * (1/2 + 3**(1/2)/6) + self.start_time
         )
 
 def create_trajectory_from_max_acceleration(
@@ -66,16 +66,16 @@ def create_trajectory_from_max_acceleration(
         start_pos: float,
         final_pos: float,
         max_acc: float):
-    total_duration = (10/3 * 3**(1/2) * abs(final_pos - start_pos) / max_acc)**(1/2)
-    return Trajectory(start_time, start_pos, final_pos, total_duration)
+    duratino = (10/3 * 3**(1/2) * abs(final_pos - start_pos) / max_acc)**(1/2)
+    return Trajectory(start_time, start_pos, final_pos, duratino)
 
 def create_trajectory_from_max_velocity(
         start_time: float,
         start_pos: float,
         final_pos: float,
         max_vel: float):
-    total_duration = 15/8 * abs(final_pos - start_pos) / max_vel
-    return Trajectory(start_time, start_pos, final_pos, total_duration)
+    duration = 15/8 * abs(final_pos - start_pos) / max_vel
+    return Trajectory(start_time, start_pos, final_pos, duration)
 
 TOTAL_TIME = 10
 DATA_POINT_COUNT = TOTAL_TIME * 10
@@ -87,7 +87,7 @@ trajectory = Trajectory(
     start_time=1,
     start_pos=0.5,
     final_pos=-2.5,
-    total_duration=5,
+    duration=5,
 )
 
 accelerations = [trajectory.get_acceleration(t) for t in times]
