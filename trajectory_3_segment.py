@@ -5,26 +5,16 @@ import matplotlib.pyplot as plt
 class Trajectory:
     def __init__(self,
                  start_time: float,
-                 max_acc: float,
                  start_pos: float,
-                 final_pos: float):
-        '''
-        start_time = time acceleration begins
-        max_acc = maximum acceleration
-        start_pos = starting position
-        final_pos = final position
-        '''
+                 final_pos: float,
+                 total_duration: float):
         self.start_time = start_time
-        self.max_acc = max_acc
         self.start_pos = start_pos
         self.final_pos = final_pos
+        self.total_duration = total_duration
 
         # Coefficient used in most acceleration, velocity, and position calculations
-        self.total_duration = (10/3 * 3**(1/2) * (final_pos - start_pos) / max_acc)**(1/2)
-        self.coeff = 36 * max_acc / 3**(1/2) / self.total_duration**3
-        
-        self.vmax = 3/16 * 10**(1/2) * 3**(1/4) * (max_acc * (final_pos - start_pos))**(1/2)
-        print("vmax: ", self.vmax)
+        self.coeff = 120 * (final_pos - start_pos) / self.total_duration**5
 
     def get_acceleration(self, input_time: float):
         t = input_time - self.start_time
@@ -53,13 +43,39 @@ class Trajectory:
         return self.coeff * 1/120 * d**5 + self.start_pos
     
     def get_max_velocity(self):
-        return (
-            3/16 * 10**(1/2) * 3**(1/4)
-            * (self.max_acc * (self.final_pos - self.start_pos))**(1/2)
-        )
+        return 15/8 * (self.final_pos - self.start_pos) / self.total_duration
+    
+    def get_max_acceleration(self):
+        return 10/3 * 3**(1/2) * (self.final_pos - self.start_pos) / self.total_duration**2
     
     def get_midpoint_time(self):
         return self.start_time + self.total_duration / 2
+    
+    def get_acceleration_extrema_times(self):
+        '''
+        Returns the times acceleration peaks at the beginning and hits a
+        minimum near the end.
+        '''
+        return (
+            self.total_duration * (1/2 - 3**(1/2)/6) + self.start_time,
+            self.total_duration * (1/2 + 3**(1/2)/6) + self.start_time
+        )
+
+def create_trajectory_from_max_acceleration(
+        start_time: float,
+        start_pos: float,
+        final_pos: float,
+        max_acc: float):
+    total_duration = (10/3 * 3**(1/2) * (final_pos - start_pos) / max_acc)**(1/2)
+    return Trajectory(start_time, start_pos, final_pos, total_duration)
+
+def create_trajectory_from_max_velocity(
+        start_time: float,
+        start_pos: float,
+        final_pos: float,
+        max_vel: float):
+    total_duration = 15/8 * (final_pos - start_pos) / max_vel
+    return Trajectory(start_time, start_pos, final_pos, total_duration)
 
 TOTAL_TIME = 10
 DATA_POINT_COUNT = TOTAL_TIME * 10
@@ -67,11 +83,11 @@ DATA_POINT_COUNT = TOTAL_TIME * 10
 # Horizontal axis
 times = [t/TOTAL_TIME for t in range(0, DATA_POINT_COUNT)]
 
-trajectory = Trajectory(
+trajectory = create_trajectory_from_max_velocity(
     start_time=1,
-    max_acc=2,
     start_pos=0.5,
-    final_pos=2.5
+    final_pos=2.5,
+    max_vel=1,
 )
 
 accelerations = [trajectory.get_acceleration(t) for t in times]
@@ -86,6 +102,16 @@ plt.plot(times, positions)
 plt.plot(
     trajectory.get_midpoint_time(),
     trajectory.get_max_velocity(),
+    "ro", markersize=5)
+
+# Display max and min acceleration
+plt.plot(
+    trajectory.get_acceleration_extrema_times()[0],
+    trajectory.get_max_acceleration(),
+    "ro", markersize=5)
+plt.plot(
+    trajectory.get_acceleration_extrema_times()[1],
+    -trajectory.get_max_acceleration(),
     "ro", markersize=5)
 
 plt.show()
