@@ -60,6 +60,26 @@ class Trajectory:
             self.duration * (1/2 - 3**(1/2)/6) + self.start_time,
             self.duration * (1/2 + 3**(1/2)/6) + self.start_time
         )
+    
+    def get_time_given_position(self, pos: float):
+        '''
+        Uses Newton's method to compute the time that a position corresponds to.
+        The position must be between start_pos and final_pos.
+        '''
+        min_pos = min(self.start_pos, self.final_pos)
+        max_pos = max(self.start_pos, self.final_pos)
+        if pos < min_pos or pos > max_pos:
+            raise Exception("Provided position must be between initial and final position")
+        
+        guess = self.get_midpoint_time()
+        for i in range(10):
+            guess_pos = self.get_position(guess) - pos
+            guess_vel = self.get_velocity(guess)
+            if abs(guess_vel) < 0.00001:
+                return guess
+            guess -= guess_pos / guess_vel
+        
+        return guess
 
 def create_trajectory_from_max_acceleration(
         start_time: float,
@@ -108,10 +128,15 @@ plt.plot(
 plt.plot(
     trajectory.get_acceleration_extrema_times()[0],
     trajectory.get_max_acceleration(),
-    "ro", markersize=5)
+    "go", markersize=5)
 plt.plot(
     trajectory.get_acceleration_extrema_times()[1],
     -trajectory.get_max_acceleration(),
-    "ro", markersize=5)
+    "go", markersize=5)
+
+# Show a point that was found with Newton's method
+sample_pos = -0.1
+sample_time = trajectory.get_time_given_position(sample_pos)
+plt.plot(sample_time, sample_pos, "bo", markersize=5)
 
 plt.show()
