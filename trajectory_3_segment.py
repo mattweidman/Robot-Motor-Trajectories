@@ -66,8 +66,8 @@ def create_trajectory_from_max_acceleration(
         start_pos: float,
         final_pos: float,
         max_acc: float):
-    duratino = (10/3 * 3**(1/2) * abs(final_pos - start_pos) / max_acc)**(1/2)
-    return Trajectory(start_time, start_pos, final_pos, duratino)
+    duration = (10/3 * 3**(1/2) * abs(final_pos - start_pos) / max_acc)**(1/2)
+    return Trajectory(start_time, start_pos, final_pos, duration)
 
 def create_trajectory_from_max_velocity(
         start_time: float,
