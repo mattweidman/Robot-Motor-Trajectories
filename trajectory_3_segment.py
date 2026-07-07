@@ -72,7 +72,7 @@ class Trajectory:
             raise Exception("Provided position must be between initial and final position")
         
         guess = self.get_midpoint_time()
-        for i in range(10):
+        for i in range(6):
             guess_pos = self.get_position(guess) - pos
             guess_vel = self.get_velocity(guess)
             if abs(guess_vel) < 0.00001:
@@ -135,7 +135,7 @@ plt.plot(
     "go", markersize=5)
 
 # Show a point that was found with Newton's method
-sample_pos = -0.1
+sample_pos = 0.5
 sample_time = trajectory.get_time_given_position(sample_pos)
 plt.plot(sample_time, sample_pos, "bo", markersize=5)
 
