@@ -22,6 +22,9 @@ class Trajectory:
         # Coefficient used in most acceleration, velocity, and position calculations
         self.total_duration = (10/3 * 3**(1/2) * (final_pos - start_pos) / max_acc)**(1/2)
         self.coeff = 36 * max_acc / 3**(1/2) / self.total_duration**3
+        
+        self.vmax = 3/16 * 10**(1/2) * 3**(1/4) * (max_acc * (final_pos - start_pos))**(1/2)
+        print("vmax: ", self.vmax)
 
     def get_acceleration(self, input_time: float):
         t = input_time - self.start_time
@@ -48,6 +51,15 @@ class Trajectory:
                 + self.start_pos
             )
         return self.coeff * 1/120 * d**5 + self.start_pos
+    
+    def get_max_velocity(self):
+        return (
+            3/16 * 10**(1/2) * 3**(1/4)
+            * (self.max_acc * (self.final_pos - self.start_pos))**(1/2)
+        )
+    
+    def get_midpoint_time(self):
+        return self.start_time + self.total_duration / 2
 
 TOTAL_TIME = 10
 DATA_POINT_COUNT = TOTAL_TIME * 10
@@ -69,4 +81,11 @@ positions = [trajectory.get_position(t) for t in times]
 plt.plot(times, accelerations)
 plt.plot(times, velocities)
 plt.plot(times, positions)
+
+# Display max velocity
+plt.plot(
+    trajectory.get_midpoint_time(),
+    trajectory.get_max_velocity(),
+    "ro", markersize=5)
+
 plt.show()
